@@ -1,8 +1,298 @@
-html, body {
+/*VARIABILI*/
+:root{
+  /* misure generali della “pagina”*/
+  --page-w:        960px;
+  --header-h:      44px;
+  --gap:           8px;
+
+  /* larghezza della colonna di sinistra (info e categorie) */
+  --w-sidebar:     210px;
+
+  /* altezze dei blocchi in colonna sinistra (così non si muove la mappa) */
+  --h-info:        190px;   /* altezza Info */
+  --h-legend:      240px;   /* altezza Categorie*/
+
+  /* riga in basso: a sinistra c’è obiettivo, a destra elevazione */
+  --h-obj:          84px;   /* altezza obbiettivo */
+  --h-elev:         84px;   /* altezza atitudine*/
+  --h-bottom:       294px;  /* altezza della riga (deve coprire entrambe) */
+
+  /* sposto in alto info e categorie senza muovere la mappa*/
+  --info-shift:     -40px;
+  --legend-shift:   -40px;
+
+  /* alzo le card sotto */
+  --obj-shift:      -50px;
+  --elev-shift:     -50px;
+
+  --fs-title:       18px;
+  --fs-text:        10.5px;
+  --fs-small:        9.5px;
+
+  /* stile dei pannelli (colori e bordi) */
+  --radius:         9px;
+  --shadow:         0 3px 10px rgba(0,0,0,.10);
+
+  /* colori base del tema */
+  --bg:             #f8e0e0;
+  --panel:          #d72626;
+  --panel-dark:     #b31f1f;
+  --ink:            #231b2b;
+}
+
+/*STILI GENERALI*/
+*{
+  box-sizing: border-box;
+}
+html, body{
+  height: 100%;
+}
+body{
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: var(--fs-text);
+  background: var(--bg);
+  color: #1f1f1f;
+  /* niente scroll perché tutto deve stare in una schermata del pc*/
+  overflow: hidden;
+}
+
+/*HEADER*/
+.page-header{
+  width: var(--page-w);
+  height: var(--header-h);
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 2px;
+  position: relative;
+  z-index: 1; /* le card a sinistra passano sopra se le alzo */
+}
+.page-header h1{
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-title);
+  letter-spacing: .3px;
+  line-height: 1.05;
+}
+.page-header p{
+  margin: 0;
+  color: #000000;
+  font-size: var(--fs-small);
+}
+
+/*GRIGLIA PRINCIPALE
+   sinistra = info, legenda
+   destra   = mappa grande
+   sotto    = obiettivo e slider elevazione */
+.layout{
+  width: var(--page-w);
+  height: calc(100vh - var(--header-h));
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: var(--w-sidebar) 1fr;
+  grid-template-rows: var(--h-info) var(--h-legend) 1fr var(--h-bottom);
+  grid-template-areas:
+    "info       map"
+    "legend     map"
+    ".          map"
+    "objective  elev";
+  gap: var(--gap);
+
+  position: relative;
+  z-index: 2; /* sopra l’header, altrimenti non posso andare su con le card */
+}
+
+/*CARD ROSSE*/
+.card{
+  background: var(--panel);
+  color: #ffffff;
+  border-radius: var(--radius);
+  border: 2px solid var(--panel-dark);
+  box-shadow: var(--shadow);
+  padding: 6px 8px;
+
+  position: relative; /* per usare z-index */
+  z-index: 3;
+}
+.card h2{
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: .25px;
+}
+
+/*CARD: INFO*/
+.info-card{
+  grid-area: info;
+  height: var(--h-info);
+  overflow: hidden;
+  transform: translateY(var(--info-shift));
+}
+.info-card .kv{
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  background: #fff3;
+  border-radius: 8px;
+  padding: 5px 7px;
+  margin: 4px 0;
+  font-size: var(--fs-small);
+}
+
+/*CARD: LEGENDA*/
+.legend-card{
+  grid-area: legend;
+  height: var(--h-legend);
+  overflow: hidden;
+  transform: translateY(var(--legend-shift));
+}
+.legend-list{
+  list-style: none;
   margin: 0;
   padding: 0;
 }
+.legend-item{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff3;
+  border-radius: 8px;
+  padding: 5px 7px;
+  margin: 4px 0;
+  font-size: var(--fs-small);
+}
+.legend-swatch{
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
 
-canvas {
+/*MAPPA*/
+.map-wrap{
+  grid-area: map;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 0;   /* la mappa sta sotto le card di sinistra */
+}
+.map-bg{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .45;
+  pointer-events: none; /* così non blocca il mouse sugli svg */
+}
+#map{
+  position: absolute;
+  inset: 0;
+  width: 90%;
+  height: 80%; /*sennò è troppo grande*/
+}
+
+/*SIMBOLI (formine)*/
+.path-dot{
+  stroke: #1f1b2a;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke; /* così lo spessore non si deforma */
+  opacity: .95;
+  transition: transform .15s ease, opacity .15s ease;
+  transform-origin: center;
+}
+
+/*TOOLTIP (i rettangolino quando vado su un vulcano)*/
+.tooltip{
+  position: absolute;
+  background: #111;
+  color: #fff;
+  padding: 5px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  box-shadow: var(--shadow);
+  transform: translate(-50%, -120%);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+/*CARD: OBBIETTIVO*/
+.objective-card{
+  grid-area: objective;
+  height: var(--h-obj);
+  overflow: hidden;
+  transform: translateY(var(--obj-shift));
+  z-index: 3;
+}
+.objective-card p{
+  background: #fff;
+  color: #222;
+  border-radius: 8px;
+  padding: 8px 9px;
+  font-size: 9px;
+  line-height: 1.28;
+  margin: 0;
+}
+
+/*CARD: ALTITUDINE*/
+.slider-card{
+  grid-area: elev;
+  height: var(--h-elev);
+  overflow: hidden;
+  transform: translateY(var(--elev-shift));
+  z-index: 3;
+}
+.slider-card .scale{
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  margin-bottom: 4px;
+}
+
+/*contenitore dello slider*/
+.slider-row{
+  padding: 6px;
+  border-radius: 9px;
+}
+
+/*slider*/
+#elevRange{
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;        /* altezza “totale” per far centrare il pallino */
+  background: transparent;
+  outline: none;
+}
+
+/* TRACK*/
+#elevRange::-webkit-slider-runnable-track{
+  height: 10px;        /* spessore della barra colorata */
+  background: linear-gradient(90deg, #1a1a1a, #ff0000 50%, #ff9d98);
+  border-radius: 999px;
+  border: none;
+}
+
+/* PALLINO*/
+#elevRange::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #000;
+  border: 2px solid #ffd7d7;
+  cursor: pointer;
+  margin-top: -4px; /* calcolato a occhio su spessore 10 */
+}
+
+/* numero sotto allo slider*/
+#elevOut{
   display: block;
+  text-align: left;
+  margin-top: 6px;
+  font-weight: 700;
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
 }

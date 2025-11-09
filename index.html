@@ -1,18 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DATA OVERVIEW - VOLCANOES</title>
 
-    <title>Sketch</title>
+  <!-- collego il css dei vulcani -->
+  <link rel="stylesheet" href="style.css" />
 
-    <link rel="stylesheet" type="text/css" href="style.css">
+  <!-- uso D3 solo per leggere il csv-->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body>
+  <header class="page-header">
+    <h1>DATA OVERVIEW - VOLCANOES</h1>
+    <p>Viola Naldi — Assignment 3 — Laboratorio di Computer Grafica 2025</p>
+  </header>
 
-    <script src="libraries/p5.min.js"></script>
-    <script src="libraries/p5.sound.min.js"></script>
-  </head>
+  <main class="layout">
 
-  <body>
-    <script src="sketch.js"></script>
-  </body>
+    <!-- card a sinistra con le info del vulcano quando ci passo sopra, 
+     non è importante cliccarci sopra ma basta fare hover -->
+    <section class="card info-card">
+      <h2>SELEZIONA UN VULCANO</h2>
+      <div class="kv"><span>Number</span><strong id="v-num">—</strong></div>
+      <div class="kv"><span>Country</span><strong id="v-country">—</strong></div>
+      <div class="kv"><span>Type</span><strong id="v-type">—</strong></div>
+      <div class="kv"><span>Status</span><strong id="v-status">—</strong></div>
+      <div class="kv"><span>Elevation</span><strong id="v-elev">—</strong></div>
+      <div class="kv"><span>Last Eruption</span><strong id="v-last">—</strong></div>
+    </section>
+
+    <section class="card legend-card">
+      <h2>CATEGORIE</h2>
+      <ul id="legend" class="legend-list"></ul>
+    </section>
+
+    <!-- a destra la mappa. sotto c’è un svg dove metto i simboli dei vulcani -->
+    <section class="map-wrap" id="mapWrap">
+      <!-- mappa scaricata da adobe stock in vettoriale -->
+      <img class="map-bg" src="assets/world-map.svg" alt="World map" />
+      <svg id="map" role="img" aria-label="World volcanoes"></svg>
+      <!-- qui appare il tooltip (rettangolino) quando mi muovo sopra un simbolo
+       ha poche info perchè tanto c'è la sezione a posta -->
+      <div id="tooltip" class="tooltip" hidden></div>
+    </section>
+
+    <!-- filtro per l'altitudine, muovo lo slider e sotto mostra il numero -->
+    <section class="card slider-card">
+      <h2>ALTITUDINE (fai refresh per vederli tutti)</h2>
+      <div class="slider-row">
+        <input id="elevRange" type="range" min="-6000" max="7000" step="50" value="0" />
+        <output id="elevOut">0 m</output>
+      </div>
+    </section>
+
+    <section class="card objective-card">
+      <h2>OBBIETTIVO</h2>
+      <p>Visione d’insieme del dataset con un glifo per ogni vulcano e legenda per interpretare le categorie.</p>
+    </section>
+  </main>
+
+  <script src="sketch.js"></script>
+</body>
 </html>
